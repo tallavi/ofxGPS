@@ -1,8 +1,9 @@
 /*
- *  ofIphoneCoreLocation.h
+ *  ofxGPSImpliOS.h
  *
- *  Created by Zach Gage on 3/1/09.
- *  Copyright 2009 stfj. All rights reserved.
+ *  Created by Tal Lavi on 10/2/14.
+ *  Based on ofxiOSCoreLocation.h by Zach Gage
+ *
  *
  */
 

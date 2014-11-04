@@ -1,9 +1,9 @@
 /*
- *  ofxiOSCoreLocation.cpp
- *  iPhone CoreLocation Example
  *
- *  Created by Zach Gage on 3/1/09.
- *  Copyright 2009 stfj. All rights reserved.
+ *  ofxGPSImpliOS.mm
+ *
+ *  Created by Tal Lavi on 10/2/14.
+ *  Based on ofxiOSCoreLocation.cpp by Zach Gage
  *
  *
  *
