@@ -13,7 +13,7 @@
 
 #pragma once
 
-@interface ofxiOSCoreLocationDelegate : NSObject <CLLocationManagerDelegate>
+@interface ofxGPSImpliOSCoreLocationDelegate : NSObject <CLLocationManagerDelegate>
 {
 	CLLocationManager *locationManager;
 	
@@ -34,8 +34,6 @@
 	double trueHeading;
 	double headingAccuracy;
 	//NSString * lastUpdatedCompasTimestamp
-    
-    ofxGPSData m_gpsData;
 }
 
 @property (nonatomic, readonly) double lat;
@@ -110,7 +108,7 @@ public:
     
 protected:
 
-    ofxiOSCoreLocationDelegate *	coreLoc;
+    ofxGPSImpliOSCoreLocationDelegate *	coreLoc;
 };
 
 #define ofxiPhoneCoreLocation ofxiOSCoreLocation

@@ -1,46 +1,45 @@
+//
+//  ofxGPSImplAndroid.cpp
+//
+//  Created by Tal Lavi on 10/12/14.
+//
+//
+
+#include "ofxGPSImplAndroid.h"
+#include "ofMain.h"
 #include "ofxAndroidGPS.h"
-#include "ofxAndroidUtils.h"
-#include <jni.h>
-
-ofEvent<ofxLocation> ofxAndroidGPS::locationChangedE;
 
 
-void ofxAndroidGPS::startGPS(){
-	jclass OFAndroid = ofGetJavaOFAndroid();
+ofxGPSImplAndroid::ofxGPSImplAndroid()
+{
+    ofxAndroidGPS::startGPS();
 
-	if(OFAndroid==0){
-		ofLogError("ofxAndroidGPS") << "startGPS(): couldn't find OFAndroid java class";
-		return;
-	}
-
-	jmethodID setupGPS = ofGetJNIEnv()->GetStaticMethodID(OFAndroid,"setupGPS","()V");
-	if(!setupGPS){
-		ofLogError("ofxAndroidGPS") << "startGPS(): couldn't find OFAndroid.setupGPS method";
-		return;
-	}
-	ofGetJNIEnv()->CallStaticVoidMethod(OFAndroid,setupGPS);
+    ofAddListener(ofxAndroidGPS::locationChangedE, this, &ofxGPSImplAndroid::onLocationChanged);
 }
 
-void ofxAndroidGPS::stopGPS(){
-	jclass OFAndroid = ofGetJavaOFAndroid();
+void ofxGPSImplAndroid::onLocationChanged(ofxLocation& newLocation)
+{
+	m_gpsData.time = Poco::Timestamp();
+    
+	m_gpsData.hasLocation = true;
 
-	if(OFAndroid==0){
-		ofLogError("ofxAndroidGPS") << "stopGPS(): couldn't find OFAndroid java class";
-		return;
-	}
+	m_gpsData.longitude = newLocation.longitude;
+	m_gpsData.latitude = newLocation.latitude;
+	m_gpsData.altitude = newLocation.altitude;
 
-	jmethodID stopGPS = ofGetJNIEnv()->GetStaticMethodID(OFAndroid,"stopGPS","()V");
-	if(!stopGPS){
-		ofLogError("ofxAndroidGPS") << "stopGPS(): couldn't find OFAndroid.stopGPS method";
-		return;
-	}
-	ofGetJNIEnv()->CallStaticVoidMethod(OFAndroid,stopGPS);
+	m_gpsData.hasHeading = false;
+
+	//m_gpsData.hasHeading = true;
+	//m_gpsData.heading = 0;
 }
 
-extern "C"{
-void
-Java_cc_openframeworks_OFAndroidGPS_locationChanged( JNIEnv*  env, jobject  thiz, jdouble altitude, jdouble latitude, jdouble longitude, jfloat speed, jfloat bearing ){
-	ofxLocation location = {altitude, latitude, longitude, speed, bearing};
-	ofNotifyEvent(ofxAndroidGPS::locationChangedE,location);
+ofxGPSData ofxGPSImplAndroid::getGPSData()
+{
+	return m_gpsData;
 }
+
+std::shared_ptr<ofxGPS> ofxGPS::create()
+{
+    return std::shared_ptr<ofxGPS>(new ofxGPSImplAndroid());
 }
+

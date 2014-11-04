@@ -24,7 +24,7 @@
 //--------------------------------------------------------------
 ofxGPSImpliOS::ofxGPSImpliOS()
 {
-	coreLoc = [[ofxiOSCoreLocationDelegate alloc] init];
+	coreLoc = [[ofxGPSImpliOSCoreLocationDelegate alloc] init];
     
     [coreLoc startLocation];
     [coreLoc startHeading];
@@ -151,7 +151,7 @@ double ofxGPSImpliOS::getHeadingAccuracy()
 	return [coreLoc headingAccuracy];
 }
 
-std::shared_ptr<ofxGPS> ofxGPSFactory::create()
+std::shared_ptr<ofxGPS> ofxGPS::create()
 {
     return std::shared_ptr<ofxGPS>(new ofxGPSImpliOS());
 }
@@ -160,7 +160,7 @@ std::shared_ptr<ofxGPS> ofxGPSFactory::create()
 
 // CLASS IMPLEMENTATIONS--------------objc------------------------
 //----------------------------------------------------------------
-@implementation ofxiOSCoreLocationDelegate
+@implementation ofxGPSImpliOSCoreLocationDelegate
 
 //--------------------------------------------------------------
 //create getter/setter functions for these variables
@@ -187,9 +187,9 @@ std::shared_ptr<ofxGPS> ofxGPSFactory::create()
 		trueHeading = 0;
 		headingAccuracy = 0;
         
-        m_gpsData.hasLocation = false;
-        m_gpsData.hasAltitude = false;
-        m_gpsData.hasHeading = false;
+        gpsData.hasLocation = false;
+        gpsData.hasAltitude = false;
+        gpsData.hasHeading = false;
 		
 		locationManager = [[CLLocationManager alloc] init];
 		locationManager.delegate = self;
@@ -268,14 +268,14 @@ std::shared_ptr<ofxGPS> ofxGPSFactory::create()
 	didUpdateToLocation:(CLLocation *)newLocation
 		   fromLocation:(CLLocation *)oldLocation
 {
-    m_gpsData.time = Poco::Timestamp();
+    gpsData.time = Poco::Timestamp();
     
     
     
 	if (signbit(newLocation.horizontalAccuracy)) {
 		// Negative accuracy means an invalid or unavailable measurement
 		NSLog(@"LatLongUnavailable");
-        m_gpsData.hasLocation = false;
+        gpsData.hasLocation = false;
 	} else {
 		lat = newLocation.coordinate.latitude;
 		lng = newLocation.coordinate.longitude;
@@ -286,23 +286,23 @@ std::shared_ptr<ofxGPS> ofxGPSFactory::create()
 			distMoved = distanceMoved;
 		}
         
-        m_gpsData.hasLocation = true;
-        m_gpsData.latitude = lat;
-        m_gpsData.longitude = lng;
-        m_gpsData.locationAccuracy = hAccuracy;
+        gpsData.hasLocation = true;
+        gpsData.latitude = lat;
+        gpsData.longitude = lng;
+        gpsData.locationAccuracy = hAccuracy;
 	}
 
 	if (signbit(newLocation.verticalAccuracy)) {
 		// Negative accuracy means an invalid or unavailable measurement
 		NSLog(@"AltUnavailable");
-        m_gpsData.hasHeading = false;
+        gpsData.hasHeading = false;
 	} else {
 		vAccuracy = newLocation.verticalAccuracy;
 		alt = newLocation.altitude;
         
-        m_gpsData.hasAltitude = true;
-        m_gpsData.altitude = alt;
-        m_gpsData.headingAccuracy = vAccuracy;
+        gpsData.hasAltitude = true;
+        gpsData.altitude = alt;
+        gpsData.headingAccuracy = vAccuracy;
 	}
 	
 }
@@ -313,7 +313,7 @@ std::shared_ptr<ofxGPS> ofxGPSFactory::create()
 //called when the heading is updated
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
 {
-    m_gpsData.hasHeading = true;
+    gpsData.hasHeading = true;
 	x = newHeading.x;
 	y = newHeading.y;
 	z = newHeading.z;
@@ -321,8 +321,8 @@ std::shared_ptr<ofxGPS> ofxGPSFactory::create()
 	trueHeading = newHeading.trueHeading;
 	headingAccuracy = newHeading.headingAccuracy;
     
-    m_gpsData.heading = trueHeading;
-    m_gpsData.headingAccuracy = headingAccuracy;
+    gpsData.heading = trueHeading;
+    gpsData.headingAccuracy = headingAccuracy;
 }
 #endif
 

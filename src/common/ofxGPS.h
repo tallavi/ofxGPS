@@ -26,25 +26,18 @@ struct ofxGPSData
     double headingAccuracy;
     
     Poco::Timestamp time;
-}
+};
 
 class ofxGPS
 {
     
 public:
     
-    virtual ofxGPS() { }
+    static std::shared_ptr<ofxGPS> create();
+    
+    virtual ~ofxGPS() {}
     
     virtual ofxGPSData getGPSData() = 0;
 };
-
-class ofxGPSFactory
-{
-    
-public:
-    static std::shared_ptr<ofxGPS> create();
-    
-};
-
 
 

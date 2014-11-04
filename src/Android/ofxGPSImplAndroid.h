@@ -1,23 +1,36 @@
+//
+//  ofxGPSImplAndroid.h
+//
+//  Created by Tal Lavi on 10/12/14.
+//
+//
+
 #pragma once
 
-#include "ofEvents.h"
+#include "ofMain.h"
 #include "ofxGPS.h"
+#include "ofxGPS_old.h"
 
+class ofxGPSImplAndroid : public ofxGPS
+{
 
-class ofxAndroidGPS{
+private:
+
+    ofxGPSData m_gpsData;
+
+private:
+
+    void onLocationChanged(ofxLocation& newLocation);
+
 public:
-	static void startGPS();
-	static void stopGPS();
 
-	static ofEvent<ofxLocation> locationChangedE;
+    ofxGPSImplAndroid();
+    
+    virtual ~ofxGPSImplAndroid(){};
+
+    virtual ofxGPSData getGPSData();
+    
+    static std::shared_ptr<ofxGPS> create();
+
 };
 
-template<class Listener>
-void ofRegisterGPSEvent(Listener * listener){
-	ofAddListener(ofxAndroidGPS::locationChangedE,listener,&Listener::locationChanged);
-}
-
-template<class Listener>
-void ofUnregisterGPSEvent(Listener * listener){
-	ofRemoveListener(ofxAndroidGPS::locationChangedE,listener,&Listener::locationChanged);
-}
