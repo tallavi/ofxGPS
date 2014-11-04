@@ -34,6 +34,8 @@
 	double trueHeading;
 	double headingAccuracy;
 	//NSString * lastUpdatedCompasTimestamp
+    
+    ofxGPSData m_gpsData;
 }
 
 @property (nonatomic, readonly) double lat;
@@ -48,6 +50,7 @@
 @property (nonatomic, readonly) double magneticHeading;
 @property (nonatomic, readonly) double trueHeading;
 @property (nonatomic, readonly) double headingAccuracy;
+@property (nonatomic, readonly) ofxGPSData gpsData;
 
 - (id) init;
 - (void) dealloc;
@@ -73,39 +76,41 @@
 #define ofxiPhoneCoreLocationDelegate ofxiOSCoreLocationDelegate
 
 
-class ofxGpsImpliOS: public ofxGPS
+class ofxGPSImpliOS: public ofxGPS
 {
-		
-	public:
-		
-		ofxiOSCoreLocation();
-		~ofxiOSCoreLocation();	
-		
-		bool startHeading();
-		void stopHeading();
-		
-		bool startLocation();
-		void stopLocation();
-  
-        bool startMonitoringSignificantLocationChanges();
-        void stopMonitoringSignificantLocationChanges();	
-  
-		double getLatitude();
-		double getLongitude();
-		double getLocationAccuracy();
-		double getAltitude();
-		double getAltitudeAccuracy();
-		double getDistMoved();
-		double getCompassX();
-		double getCompassY();
-		double getCompassZ();
-		double getMagneticHeading();
-		double getTrueHeading();
-		double getHeadingAccuracy();
-		
-	protected:
-	
-		ofxiOSCoreLocationDelegate *	coreLoc;
+    
+public:
+    
+    ofxGPSImpliOS();
+    ~ofxGPSImpliOS();
+
+    virtual ofxGPSData getGPSData();
+    
+    bool startHeading();
+    void stopHeading();
+    
+    bool startLocation();
+    void stopLocation();
+
+    bool startMonitoringSignificantLocationChanges();
+    void stopMonitoringSignificantLocationChanges();	
+
+    double getLatitude();
+    double getLongitude();
+    double getLocationAccuracy();
+    double getAltitude();
+    double getAltitudeAccuracy();
+    double getDistMoved();
+    double getCompassX();
+    double getCompassY();
+    double getCompassZ();
+    double getMagneticHeading();
+    double getTrueHeading();
+    double getHeadingAccuracy();
+    
+protected:
+
+    ofxiOSCoreLocationDelegate *	coreLoc;
 };
 
 #define ofxiPhoneCoreLocation ofxiOSCoreLocation

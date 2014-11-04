@@ -17,132 +17,144 @@
  *
  */
 
-#import "ofxiOSCoreLocation.h"
+#import "ofxGPSImpliOS.h"
 
 //C++ class implementations
 
 //--------------------------------------------------------------
-ofxiOSCoreLocation::ofxiOSCoreLocation()
+ofxGPSImpliOS::ofxGPSImpliOS()
 {
 	coreLoc = [[ofxiOSCoreLocationDelegate alloc] init];
+    
+    [coreLoc startLocation];
+    [coreLoc startHeading];
+    [coreLoc startMonitoringSignificantLocationChanges];
 }
 
 //--------------------------------------------------------------
-ofxiOSCoreLocation::~ofxiOSCoreLocation()
+ofxGPSImpliOS::~ofxGPSImpliOS()
 {
 	[coreLoc release];
 }
 
+ofxGPSData ofxGPSImpliOS::getGPSData()
+{
+    return [coreLoc gpsData];
+}
+
 //--------------------------------------------------------------
 
-bool ofxiOSCoreLocation::startHeading()
+bool ofxGPSImpliOS::startHeading()
 {
 	return [coreLoc startHeading];
 }
 
 //--------------------------------------------------------------
 
-void ofxiOSCoreLocation::stopHeading()
+void ofxGPSImpliOS::stopHeading()
 {
 	[coreLoc stopHeading];
 }
 
 //--------------------------------------------------------------
-bool ofxiOSCoreLocation::startLocation()
+bool ofxGPSImpliOS::startLocation()
 {
 	return [coreLoc startLocation];
 }
 
 //--------------------------------------------------------------
-void ofxiOSCoreLocation::stopLocation()
+void ofxGPSImpliOS::stopLocation()
 {
 	[coreLoc stopLocation];
 }
 
 //--------------------------------------------------------------
-bool ofxiOSCoreLocation::startMonitoringSignificantLocationChanges() {
+bool ofxGPSImpliOS::startMonitoringSignificantLocationChanges() {
   return [coreLoc startMonitoringSignificantLocationChanges];
 }
 
 //--------------------------------------------------------------
-void ofxiOSCoreLocation::stopMonitoringSignificantLocationChanges() {
+void ofxGPSImpliOS::stopMonitoringSignificantLocationChanges() {
   [coreLoc stopMonitoringSignificantLocationChanges];
 }
 
 //--------------------------------------------------------------
 
-double ofxiOSCoreLocation::getLatitude()
+double ofxGPSImpliOS::getLatitude()
 {
 	return [coreLoc lat];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getLongitude()
+double ofxGPSImpliOS::getLongitude()
 {
 	return [coreLoc lng];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getLocationAccuracy()
+double ofxGPSImpliOS::getLocationAccuracy()
 {
 	return [coreLoc hAccuracy];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getAltitude()
+double ofxGPSImpliOS::getAltitude()
 {
 	return [coreLoc alt];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getAltitudeAccuracy()
+double ofxGPSImpliOS::getAltitudeAccuracy()
 {
 	return [coreLoc vAccuracy];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getDistMoved()
+double ofxGPSImpliOS::getDistMoved()
 {
 	return [coreLoc distMoved];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getCompassX()
+double ofxGPSImpliOS::getCompassX()
 {
 	return [coreLoc x];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getCompassY()
+double ofxGPSImpliOS::getCompassY()
 {
 	return [coreLoc y];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getCompassZ()
+double ofxGPSImpliOS::getCompassZ()
 {
 	return [coreLoc z];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getMagneticHeading()
+double ofxGPSImpliOS::getMagneticHeading()
 {
 	return [coreLoc magneticHeading];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getTrueHeading()
+double ofxGPSImpliOS::getTrueHeading()
 {
 	return [coreLoc trueHeading];
 }
 
 //--------------------------------------------------------------
-double ofxiOSCoreLocation::getHeadingAccuracy()
+double ofxGPSImpliOS::getHeadingAccuracy()
 {
 	return [coreLoc headingAccuracy];
 }
 
-
+std::shared_ptr<ofxGPS> ofxGPSFactory::create()
+{
+    return std::shared_ptr<ofxGPS>(new ofxGPSImpliOS());
+}
 
 //--------------------------------------------------------------
 
@@ -152,7 +164,7 @@ double ofxiOSCoreLocation::getHeadingAccuracy()
 
 //--------------------------------------------------------------
 //create getter/setter functions for these variables
-@synthesize lat, lng, hAccuracy, alt, vAccuracy, distMoved, x, y, z, magneticHeading, trueHeading, headingAccuracy;
+@synthesize lat, lng, hAccuracy, alt, vAccuracy, distMoved, x, y, z, magneticHeading, trueHeading, headingAccuracy, gpsData;
 
 //--------------------------------------------------------------
 - (id) init
@@ -174,7 +186,10 @@ double ofxiOSCoreLocation::getHeadingAccuracy()
 		magneticHeading = 0;
 		trueHeading = 0;
 		headingAccuracy = 0;
-		
+        
+        m_gpsData.hasLocation = false;
+        m_gpsData.hasAltitude = false;
+        m_gpsData.hasHeading = false;
 		
 		locationManager = [[CLLocationManager alloc] init];
 		locationManager.delegate = self;
@@ -253,9 +268,14 @@ double ofxiOSCoreLocation::getHeadingAccuracy()
 	didUpdateToLocation:(CLLocation *)newLocation
 		   fromLocation:(CLLocation *)oldLocation
 {
+    m_gpsData.time = Poco::Timestamp();
+    
+    
+    
 	if (signbit(newLocation.horizontalAccuracy)) {
 		// Negative accuracy means an invalid or unavailable measurement
 		NSLog(@"LatLongUnavailable");
+        m_gpsData.hasLocation = false;
 	} else {
 		lat = newLocation.coordinate.latitude;
 		lng = newLocation.coordinate.longitude;
@@ -265,14 +285,24 @@ double ofxiOSCoreLocation::getHeadingAccuracy()
 			CLLocationDistance distanceMoved = [newLocation distanceFromLocation:oldLocation];
 			distMoved = distanceMoved;
 		}
+        
+        m_gpsData.hasLocation = true;
+        m_gpsData.latitude = lat;
+        m_gpsData.longitude = lng;
+        m_gpsData.locationAccuracy = hAccuracy;
 	}
 
 	if (signbit(newLocation.verticalAccuracy)) {
 		// Negative accuracy means an invalid or unavailable measurement
 		NSLog(@"AltUnavailable");
+        m_gpsData.hasHeading = false;
 	} else {
 		vAccuracy = newLocation.verticalAccuracy;
 		alt = newLocation.altitude;
+        
+        m_gpsData.hasAltitude = true;
+        m_gpsData.altitude = alt;
+        m_gpsData.headingAccuracy = vAccuracy;
 	}
 	
 }
@@ -283,12 +313,16 @@ double ofxiOSCoreLocation::getHeadingAccuracy()
 //called when the heading is updated
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
 {
+    m_gpsData.hasHeading = true;
 	x = newHeading.x;
 	y = newHeading.y;
 	z = newHeading.z;
 	magneticHeading = newHeading.magneticHeading;
 	trueHeading = newHeading.trueHeading;
 	headingAccuracy = newHeading.headingAccuracy;
+    
+    m_gpsData.heading = trueHeading;
+    m_gpsData.headingAccuracy = headingAccuracy;
 }
 #endif
 

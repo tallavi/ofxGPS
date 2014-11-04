@@ -15,12 +15,15 @@ struct ofxGPSData
     bool hasLocation;
     double longitude;
     double latitude;
+    double locationAccuracy;
     
     bool hasAltitude;
     double altitude;
+    double altitudeAccuracy;
     
     bool hasHeading;
     double heading;
+    double headingAccuracy;
     
     Poco::Timestamp time;
 }
