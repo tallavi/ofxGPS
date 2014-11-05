@@ -9,28 +9,45 @@
 
 #include "ofMain.h"
 #include "ofxGPS.h"
-#include "ofxGPS_old.h"
+#include "ofEvents.h"
 
 class ofxGPSImplAndroid : public ofxGPS
 {
 
 private:
 
-    ofxGPSData m_gpsData;
+	ofxGPSData m_gpsData;
 
 private:
 
-    void onLocationChanged(ofxLocation& newLocation);
+    void startGPS();
+    void stopGPS();
 
 public:
 
     ofxGPSImplAndroid();
     
-    virtual ~ofxGPSImplAndroid(){};
+    virtual ~ofxGPSImplAndroid();
 
     virtual ofxGPSData getGPSData();
     
+    void onNewGPSData(ofxGPSData& gpsData);
+
+public:
+
     static std::shared_ptr<ofxGPS> create();
 
+    static ofEvent<ofxGPSData> newGPSDataEvent;
+
+    template<class Listener>
+    static void registerGPSEvent(Listener * listener){
+    	ofAddListener(ofxGPSImplAndroid::newGPSDataEvent, listener, &Listener::newGPSData);
+    }
+
+    template<class Listener>
+    static void unregisterGPSEvent(Listener * listener){
+    	ofRemoveListener(ofxGPSImplAndroid::newGPSDataEvent, listener, &Listener::newGPSData);
+    }
 };
+
 

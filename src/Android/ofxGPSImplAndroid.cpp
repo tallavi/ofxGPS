@@ -7,30 +7,29 @@
 
 #include "ofxGPSImplAndroid.h"
 #include "ofMain.h"
-#include "ofxAndroidGPS.h"
+#include "ofxAndroidUtils.h"
+#include <jni.h>
 
+ofEvent<ofxGPSData> ofxGPSImplAndroid::newGPSDataEvent;
 
 ofxGPSImplAndroid::ofxGPSImplAndroid()
 {
-    ofxAndroidGPS::startGPS();
+	ofLogVerbose("GPS") << "starting";
 
-    ofAddListener(ofxAndroidGPS::locationChangedE, this, &ofxGPSImplAndroid::onLocationChanged);
+	jobject temp = ofGetOFActivityObject();
+
+	ofLogVerbose("GPS") << "got activity: " << temp;
+
+	ofAddListener(ofxGPSImplAndroid::newGPSDataEvent, this, &ofxGPSImplAndroid::onNewGPSData);
+
+    startGPS();
 }
 
-void ofxGPSImplAndroid::onLocationChanged(ofxLocation& newLocation)
+ofxGPSImplAndroid::~ofxGPSImplAndroid()
 {
-	m_gpsData.time = Poco::Timestamp();
-    
-	m_gpsData.hasLocation = true;
+	stopGPS();
 
-	m_gpsData.longitude = newLocation.longitude;
-	m_gpsData.latitude = newLocation.latitude;
-	m_gpsData.altitude = newLocation.altitude;
-
-	m_gpsData.hasHeading = false;
-
-	//m_gpsData.hasHeading = true;
-	//m_gpsData.heading = 0;
+	ofRemoveListener(ofxGPSImplAndroid::newGPSDataEvent, this, &ofxGPSImplAndroid::onNewGPSData);
 }
 
 ofxGPSData ofxGPSImplAndroid::getGPSData()
@@ -38,8 +37,73 @@ ofxGPSData ofxGPSImplAndroid::getGPSData()
 	return m_gpsData;
 }
 
+//TALTODO: this is being called on a different thread. synchronize.
+void ofxGPSImplAndroid::onNewGPSData(ofxGPSData& gpsData)
+{
+	ofLogVerbose("GPS") << "new data (2)";
+
+	m_gpsData = gpsData;
+}
+
 std::shared_ptr<ofxGPS> ofxGPS::create()
 {
     return std::shared_ptr<ofxGPS>(new ofxGPSImplAndroid());
+}
+
+void ofxGPSImplAndroid::startGPS(){
+
+	jclass OFAndroid = ofGetJavaOFAndroid();
+
+	if(OFAndroid==0){
+		ofLogError("ofxAndroidGPS") << "startGPS(): couldn't find OFAndroid java class";
+		return;
+	}
+
+	jmethodID setupGPS = ofGetJNIEnv()->GetStaticMethodID(OFAndroid,"setupGPS","()V");
+	if(!setupGPS){
+		ofLogError("ofxAndroidGPS") << "startGPS(): couldn't find OFAndroid.setupGPS method";
+		return;
+	}
+	ofGetJNIEnv()->CallStaticVoidMethod(OFAndroid,setupGPS);
+}
+
+void ofxGPSImplAndroid::stopGPS(){
+	jclass OFAndroid = ofGetJavaOFAndroid();
+
+	if(OFAndroid==0){
+		ofLogError("ofxAndroidGPS") << "stopGPS(): couldn't find OFAndroid java class";
+		return;
+	}
+
+	jmethodID stopGPS = ofGetJNIEnv()->GetStaticMethodID(OFAndroid,"stopGPS","()V");
+	if(!stopGPS){
+		ofLogError("ofxAndroidGPS") << "stopGPS(): couldn't find OFAndroid.stopGPS method";
+		return;
+	}
+	ofGetJNIEnv()->CallStaticVoidMethod(OFAndroid,stopGPS);
+}
+
+extern "C"{
+void
+Java_cc_openframeworks_OFAndroidGPS_locationChanged( JNIEnv*  env, jobject  thiz, jdouble altitude, jdouble latitude, jdouble longitude, jfloat speed, jfloat bearing ){
+
+	ofLogVerbose("GPS") << "new data (1)";
+
+	ofxGPSData gpsData;
+
+	gpsData.time = Poco::Timestamp();
+
+	gpsData.hasLocation = true;
+	gpsData.longitude = longitude;
+	gpsData.latitude = latitude;
+
+	gpsData.hasAltitude = true;
+	gpsData.altitude = altitude;
+
+	gpsData.hasHeading = true;
+	gpsData.heading = bearing;
+
+	ofNotifyEvent(ofxGPSImplAndroid::newGPSDataEvent, gpsData);
+}
 }
 
