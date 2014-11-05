@@ -10,6 +10,7 @@
 #include "ofMain.h"
 #include "ofxGPS.h"
 #include "ofEvents.h"
+#include "Poco/Mutex.h"
 
 class ofxGPSImplAndroid : public ofxGPS
 {
@@ -18,19 +19,19 @@ private:
 
 	ofxGPSData m_gpsData;
 
-private:
-
-    void startGPS();
-    void stopGPS();
+	Poco::Mutex m_mutex;
 
 public:
 
     ofxGPSImplAndroid();
-    
     virtual ~ofxGPSImplAndroid();
+    
+    void startGPS();
+    void stopGPS();
 
     virtual ofxGPSData getGPSData();
-    
+
+private:
     void onNewGPSData(ofxGPSData& gpsData);
 
 public:

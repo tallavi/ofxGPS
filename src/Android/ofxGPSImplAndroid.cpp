@@ -14,12 +14,6 @@ ofEvent<ofxGPSData> ofxGPSImplAndroid::newGPSDataEvent;
 
 ofxGPSImplAndroid::ofxGPSImplAndroid()
 {
-	ofLogVerbose("GPS") << "starting";
-
-	jobject temp = ofGetOFActivityObject();
-
-	ofLogVerbose("GPS") << "got activity: " << temp;
-
 	ofAddListener(ofxGPSImplAndroid::newGPSDataEvent, this, &ofxGPSImplAndroid::onNewGPSData);
 
     startGPS();
@@ -34,13 +28,14 @@ ofxGPSImplAndroid::~ofxGPSImplAndroid()
 
 ofxGPSData ofxGPSImplAndroid::getGPSData()
 {
+	Poco::Mutex::ScopedLock lock(m_mutex);
+
 	return m_gpsData;
 }
 
-//TALTODO: this is being called on a different thread. synchronize.
 void ofxGPSImplAndroid::onNewGPSData(ofxGPSData& gpsData)
 {
-	ofLogVerbose("GPS") << "new data (2)";
+	Poco::Mutex::ScopedLock lock(m_mutex);
 
 	m_gpsData = gpsData;
 }
@@ -86,8 +81,6 @@ void ofxGPSImplAndroid::stopGPS(){
 extern "C"{
 void
 Java_cc_openframeworks_OFAndroidGPS_locationChanged( JNIEnv*  env, jobject  thiz, jdouble altitude, jdouble latitude, jdouble longitude, jfloat speed, jfloat bearing ){
-
-	ofLogVerbose("GPS") << "new data (1)";
 
 	ofxGPSData gpsData;
 
