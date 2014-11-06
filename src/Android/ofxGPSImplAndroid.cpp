@@ -47,35 +47,12 @@ std::shared_ptr<ofxGPS> ofxGPS::create()
 
 void ofxGPSImplAndroid::startGPS(){
 
-	jclass OFAndroid = ofGetJavaOFAndroid();
-
-	if(OFAndroid==0){
-		ofLogError("ofxAndroidGPS") << "startGPS(): couldn't find OFAndroid java class";
-		return;
-	}
-
-	jmethodID setupGPS = ofGetJNIEnv()->GetStaticMethodID(OFAndroid,"setupGPS","()V");
-	if(!setupGPS){
-		ofLogError("ofxAndroidGPS") << "startGPS(): couldn't find OFAndroid.setupGPS method";
-		return;
-	}
-	ofGetJNIEnv()->CallStaticVoidMethod(OFAndroid,setupGPS);
+	ofCallStaticVoidJavaMethod("cc/openframeworks/OFAndroidGPS$Singleton", "startGPS", "()V");
 }
 
 void ofxGPSImplAndroid::stopGPS(){
-	jclass OFAndroid = ofGetJavaOFAndroid();
 
-	if(OFAndroid==0){
-		ofLogError("ofxAndroidGPS") << "stopGPS(): couldn't find OFAndroid java class";
-		return;
-	}
-
-	jmethodID stopGPS = ofGetJNIEnv()->GetStaticMethodID(OFAndroid,"stopGPS","()V");
-	if(!stopGPS){
-		ofLogError("ofxAndroidGPS") << "stopGPS(): couldn't find OFAndroid.stopGPS method";
-		return;
-	}
-	ofGetJNIEnv()->CallStaticVoidMethod(OFAndroid,stopGPS);
+	ofCallStaticVoidJavaMethod("cc/openframeworks/OFAndroidGPS$Singleton", "stopGPS", "()V");
 }
 
 extern "C"{
