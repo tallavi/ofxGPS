@@ -10,14 +10,17 @@
 #include "ofxAndroidUtils.h"
 
 ofEvent<ofxGPSData> ofxGPSImplAndroid::newGPSDataEvent;
+ofEvent<ofxCompassData> ofxGPSImplAndroid::newCompassDataEvent;
 
 ofxGPSImplAndroid::ofxGPSImplAndroid()
 {
 	ofAddListener(ofxGPSImplAndroid::newGPSDataEvent, this, &ofxGPSImplAndroid::onNewGPSData);
+	ofAddListener(ofxGPSImplAndroid::newCompassDataEvent, this, &ofxGPSImplAndroid::onNewCompassData);
 
 	m_OFAndroidGPS = ofJavaCallStaticObjectMethod("cc/openframeworks/OFAndroidGPS", "getInstance", "()Lcc/openframeworks/OFAndroidGPS;");
 
     startGPS();
+    startCompass();
 }
 
 ofxGPSImplAndroid::~ofxGPSImplAndroid()
@@ -25,6 +28,7 @@ ofxGPSImplAndroid::~ofxGPSImplAndroid()
 	stopGPS();
 
 	ofRemoveListener(ofxGPSImplAndroid::newGPSDataEvent, this, &ofxGPSImplAndroid::onNewGPSData);
+	ofRemoveListener(ofxGPSImplAndroid::newCompassDataEvent, this, &ofxGPSImplAndroid::onNewCompassData);
 }
 
 ofxGPSData ofxGPSImplAndroid::getGPSData()
@@ -38,7 +42,22 @@ void ofxGPSImplAndroid::onNewGPSData(ofxGPSData& gpsData)
 {
 	Poco::Mutex::ScopedLock lock(m_mutex);
 
-	m_gpsData = gpsData;
+	m_gpsData.hasLocation = gpsData.hasLocation;
+	m_gpsData.longitude = gpsData.longitude;
+	m_gpsData.latitude = gpsData.latitude;
+	m_gpsData.locationAccuracy = gpsData.locationAccuracy;
+	m_gpsData.hasAltitude = gpsData.hasAltitude;
+	m_gpsData.altitude = gpsData.altitude;
+	m_gpsData.altitudeAccuracy = gpsData.altitudeAccuracy;
+	m_gpsData.time = gpsData.time;
+}
+
+void ofxGPSImplAndroid::onNewCompassData(ofxCompassData& compassData)
+{
+	Poco::Mutex::ScopedLock lock(m_mutex);
+
+	m_gpsData.hasHeading = true;
+	m_gpsData.heading = compassData.heading;
 }
 
 std::shared_ptr<ofxGPS> ofxGPS::create()
@@ -56,9 +75,19 @@ void ofxGPSImplAndroid::stopGPS(){
 	ofJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "stopGPS",  "()V");
 }
 
+void ofxGPSImplAndroid::startCompass(){
+
+	ofJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "startCompass",  "()V");
+}
+
+void ofxGPSImplAndroid::stopCompass(){
+
+	ofJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "stopCompass",  "()V");
+}
+
 extern "C"{
 void
-Java_cc_openframeworks_OFAndroidGPS_locationChanged( JNIEnv*  env, jobject  thiz, jdouble altitude, jdouble latitude, jdouble longitude, jfloat speed, jfloat bearing ){
+Java_cc_openframeworks_OFAndroidGPS_locationChanged( JNIEnv*  env, jobject  thiz, jdouble altitude, jdouble latitude, jdouble longitude, jfloat speed, jfloat heading ){
 
 	ofxGPSData gpsData;
 
@@ -71,10 +100,21 @@ Java_cc_openframeworks_OFAndroidGPS_locationChanged( JNIEnv*  env, jobject  thiz
 	gpsData.hasAltitude = true;
 	gpsData.altitude = altitude;
 
-	gpsData.hasHeading = true;
-	gpsData.heading = bearing;
+	//gpsData.hasHeading = true;
+	//gpsData.heading = heading;
 
 	ofNotifyEvent(ofxGPSImplAndroid::newGPSDataEvent, gpsData);
 }
+
+void
+Java_cc_openframeworks_OFAndroidGPS_headingChanged( JNIEnv*  env, jobject  thiz, jdouble heading ){
+
+	ofxCompassData compassData;
+
+	compassData.heading = heading;
+
+	ofNotifyEvent(ofxGPSImplAndroid::newCompassDataEvent, compassData);
+}
+
 }
 

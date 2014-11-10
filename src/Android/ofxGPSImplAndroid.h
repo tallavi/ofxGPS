@@ -13,6 +13,11 @@
 #include "Poco/Mutex.h"
 #include <jni.h>
 
+struct ofxCompassData
+{
+	float heading;
+};
+
 class ofxGPSImplAndroid : public ofxGPS
 {
 
@@ -31,27 +36,21 @@ public:
     
     void startGPS();
     void stopGPS();
+    void startCompass();
+    void stopCompass();
 
     virtual ofxGPSData getGPSData();
 
 private:
     void onNewGPSData(ofxGPSData& gpsData);
+    void onNewCompassData(ofxCompassData& compassData);
 
 public:
 
     static std::shared_ptr<ofxGPS> create();
 
     static ofEvent<ofxGPSData> newGPSDataEvent;
-
-    template<class Listener>
-    static void registerGPSEvent(Listener * listener){
-    	ofAddListener(ofxGPSImplAndroid::newGPSDataEvent, listener, &Listener::newGPSData);
-    }
-
-    template<class Listener>
-    static void unregisterGPSEvent(Listener * listener){
-    	ofRemoveListener(ofxGPSImplAndroid::newGPSDataEvent, listener, &Listener::newGPSData);
-    }
+    static ofEvent<ofxCompassData> newCompassDataEvent;
 };
 
 
