@@ -8,6 +8,16 @@ import android.os.Bundle;
 
 public class OFAndroidGPS extends OFAndroidObject implements LocationListener {
 	
+	private static OFAndroidGPS m_instance = null;
+	
+	private static OFAndroidGPS getInstance()
+	{
+		if(m_instance == null)
+			m_instance = new OFAndroidGPS();
+		
+		return m_instance;
+	}
+	
 	void startGPS(){
 		
 		OFAndroidObject.activity.runOnUiThread(new Runnable(){
@@ -83,24 +93,5 @@ public class OFAndroidGPS extends OFAndroidObject implements LocationListener {
 		boolean wasstarted = started;
 		stopGPS();
 		started = wasstarted;
-	}
-	
-	static public class Singleton
-	{
-		private static OFAndroidGPS m_instance = null;
-	
-		public static void startGPS(){
-			if(m_instance == null)
-				m_instance = new OFAndroidGPS();
-			
-			m_instance.startGPS();
-		}
-	
-		public static void stopGPS(){
-			if(m_instance == null)
-				return;
-			
-			m_instance.stopGPS();
-		}
 	}
 }

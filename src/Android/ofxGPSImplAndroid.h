@@ -11,11 +11,14 @@
 #include "ofxGPS.h"
 #include "ofEvents.h"
 #include "Poco/Mutex.h"
+#include <jni.h>
 
 class ofxGPSImplAndroid : public ofxGPS
 {
 
 private:
+
+	jobject m_OFAndroidGPS;
 
 	ofxGPSData m_gpsData;
 

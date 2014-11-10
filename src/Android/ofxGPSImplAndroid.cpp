@@ -8,13 +8,14 @@
 #include "ofxGPSImplAndroid.h"
 #include "ofMain.h"
 #include "ofxAndroidUtils.h"
-#include <jni.h>
 
 ofEvent<ofxGPSData> ofxGPSImplAndroid::newGPSDataEvent;
 
 ofxGPSImplAndroid::ofxGPSImplAndroid()
 {
 	ofAddListener(ofxGPSImplAndroid::newGPSDataEvent, this, &ofxGPSImplAndroid::onNewGPSData);
+
+	m_OFAndroidGPS = ofJavaCallStaticObjectMethod("cc/openframeworks/OFAndroidGPS", "getInstance", "()Lcc/openframeworks/OFAndroidGPS;");
 
     startGPS();
 }
@@ -47,12 +48,12 @@ std::shared_ptr<ofxGPS> ofxGPS::create()
 
 void ofxGPSImplAndroid::startGPS(){
 
-	ofCallStaticVoidJavaMethod("cc/openframeworks/OFAndroidGPS$Singleton", "startGPS", "()V");
+	ofJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "startGPS",  "()V");
 }
 
 void ofxGPSImplAndroid::stopGPS(){
 
-	ofCallStaticVoidJavaMethod("cc/openframeworks/OFAndroidGPS$Singleton", "stopGPS", "()V");
+	ofJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "stopGPS",  "()V");
 }
 
 extern "C"{
