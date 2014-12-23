@@ -93,19 +93,6 @@ public:
 
     bool startMonitoringSignificantLocationChanges();
     void stopMonitoringSignificantLocationChanges();	
-
-    double getLatitude();
-    double getLongitude();
-    double getLocationAccuracy();
-    double getAltitude();
-    double getAltitudeAccuracy();
-    double getDistMoved();
-    double getCompassX();
-    double getCompassY();
-    double getCompassZ();
-    double getMagneticHeading();
-    double getTrueHeading();
-    double getHeadingAccuracy();
     
 protected:
 

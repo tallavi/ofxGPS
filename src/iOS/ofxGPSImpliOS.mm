@@ -21,6 +21,8 @@
 
 //C++ class implementations
 
+ofEvent<const ofxGPSData> ofxGPS::gpsDataChangedEvent;
+
 //--------------------------------------------------------------
 ofxGPSImpliOS::ofxGPSImpliOS()
 {
@@ -79,77 +81,6 @@ void ofxGPSImpliOS::stopMonitoringSignificantLocationChanges() {
 }
 
 //--------------------------------------------------------------
-
-double ofxGPSImpliOS::getLatitude()
-{
-	return [coreLoc lat];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getLongitude()
-{
-	return [coreLoc lng];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getLocationAccuracy()
-{
-	return [coreLoc hAccuracy];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getAltitude()
-{
-	return [coreLoc alt];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getAltitudeAccuracy()
-{
-	return [coreLoc vAccuracy];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getDistMoved()
-{
-	return [coreLoc distMoved];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getCompassX()
-{
-	return [coreLoc x];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getCompassY()
-{
-	return [coreLoc y];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getCompassZ()
-{
-	return [coreLoc z];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getMagneticHeading()
-{
-	return [coreLoc magneticHeading];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getTrueHeading()
-{
-	return [coreLoc trueHeading];
-}
-
-//--------------------------------------------------------------
-double ofxGPSImpliOS::getHeadingAccuracy()
-{
-	return [coreLoc headingAccuracy];
-}
 
 std::shared_ptr<ofxGPS> ofxGPS::create()
 {
@@ -270,8 +201,6 @@ std::shared_ptr<ofxGPS> ofxGPS::create()
 {
     gpsData.time = Poco::Timestamp();
     
-    
-    
 	if (signbit(newLocation.horizontalAccuracy)) {
 		// Negative accuracy means an invalid or unavailable measurement
 		NSLog(@"LatLongUnavailable");
@@ -305,6 +234,7 @@ std::shared_ptr<ofxGPS> ofxGPS::create()
         gpsData.headingAccuracy = vAccuracy;
 	}
 	
+    ofNotifyEvent(ofxGPS::gpsDataChangedEvent, gpsData);
 }
 
 //--------------------------------------------------------------
@@ -323,6 +253,8 @@ std::shared_ptr<ofxGPS> ofxGPS::create()
     
     gpsData.heading = trueHeading;
     gpsData.headingAccuracy = headingAccuracy;
+    
+    ofNotifyEvent(ofxGPS::gpsDataChangedEvent, gpsData);
 }
 #endif
 

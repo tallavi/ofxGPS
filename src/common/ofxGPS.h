@@ -38,6 +38,8 @@ public:
     virtual ~ofxGPS() {}
     
     virtual ofxGPSData getGPSData() = 0;
+    
+    static ofEvent<const ofxGPSData> gpsDataChangedEvent;
 };
 
 

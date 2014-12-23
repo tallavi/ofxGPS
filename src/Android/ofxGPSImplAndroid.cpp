@@ -12,6 +12,8 @@
 ofEvent<ofxGPSData> ofxGPSImplAndroid::newGPSDataEvent;
 ofEvent<ofxCompassData> ofxGPSImplAndroid::newCompassDataEvent;
 
+ofEvent<const ofxGPSData> ofxGPS::gpsDataChangedEvent;
+
 ofxGPSImplAndroid::ofxGPSImplAndroid()
 {
 	ofAddListener(ofxGPSImplAndroid::newGPSDataEvent, this, &ofxGPSImplAndroid::onNewGPSData);
@@ -50,6 +52,8 @@ void ofxGPSImplAndroid::onNewGPSData(ofxGPSData& gpsData)
 	m_gpsData.altitude = gpsData.altitude;
 	m_gpsData.altitudeAccuracy = gpsData.altitudeAccuracy;
 	m_gpsData.time = gpsData.time;
+
+	ofNotifyEvent(ofxGPS::gpsDataChangedEvent, m_gpsData);
 }
 
 void ofxGPSImplAndroid::onNewCompassData(ofxCompassData& compassData)
@@ -58,6 +62,8 @@ void ofxGPSImplAndroid::onNewCompassData(ofxCompassData& compassData)
 
 	m_gpsData.hasHeading = true;
 	m_gpsData.heading = compassData.heading;
+
+	ofNotifyEvent(ofxGPS::gpsDataChangedEvent, m_gpsData);
 }
 
 std::shared_ptr<ofxGPS> ofxGPS::create()
