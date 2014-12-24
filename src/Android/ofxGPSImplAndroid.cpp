@@ -19,7 +19,7 @@ ofxGPSImplAndroid::ofxGPSImplAndroid()
 	ofAddListener(ofxGPSImplAndroid::newGPSDataEvent, this, &ofxGPSImplAndroid::onNewGPSData);
 	ofAddListener(ofxGPSImplAndroid::newCompassDataEvent, this, &ofxGPSImplAndroid::onNewCompassData);
 
-	m_OFAndroidGPS = ofJavaCallStaticObjectMethod("cc/openframeworks/OFAndroidGPS", "getInstance", "()Lcc/openframeworks/OFAndroidGPS;");
+	m_OFAndroidGPS = ofxJavaCallStaticObjectMethod("cc/openframeworks/OFAndroidGPS", "getInstance", "()Lcc/openframeworks/OFAndroidGPS;");
 
     startGPS();
     startCompass();
@@ -73,22 +73,22 @@ std::shared_ptr<ofxGPS> ofxGPS::create()
 
 void ofxGPSImplAndroid::startGPS(){
 
-	ofJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "startGPS",  "()V");
+	ofxJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "startGPS",  "()V");
 }
 
 void ofxGPSImplAndroid::stopGPS(){
 
-	ofJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "stopGPS",  "()V");
+	ofxJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "stopGPS",  "()V");
 }
 
 void ofxGPSImplAndroid::startCompass(){
 
-	ofJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "startCompass",  "()V");
+	ofxJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "startCompass",  "()V");
 }
 
 void ofxGPSImplAndroid::stopCompass(){
 
-	ofJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "stopCompass",  "()V");
+	ofxJavaCallVoidMethod(m_OFAndroidGPS, "cc/openframeworks/OFAndroidGPS", "stopCompass",  "()V");
 }
 
 extern "C"{
