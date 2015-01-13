@@ -142,6 +142,7 @@ std::shared_ptr<ofxGPS> ofxGPS::create()
 {
 	if([CLLocationManager headingAvailable])
 	{
+        [locationManager requestAlwaysAuthorization];
 		[locationManager startUpdatingHeading];
 		return true;
 	}
@@ -251,7 +252,7 @@ std::shared_ptr<ofxGPS> ofxGPS::create()
 	trueHeading = newHeading.trueHeading;
 	headingAccuracy = newHeading.headingAccuracy;
     
-    gpsData.heading = trueHeading;
+    gpsData.heading = 360.0 - trueHeading;
     gpsData.headingAccuracy = headingAccuracy;
     
     ofNotifyEvent(ofxGPS::gpsDataChangedEvent, gpsData);
